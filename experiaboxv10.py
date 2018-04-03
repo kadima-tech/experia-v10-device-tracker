@@ -94,8 +94,8 @@ class ZteH369ADeviceScanner():
         result = self.parse_macs.findall(data_page.text)
 
         # And log back out
-        logout_url = 'http://{}/'.format(self.host)
-        log_out_page = session.post(logout_url)
+        logout_url = 'http://{}'.format(self.host)
+        log_out_page = session.post(logout_url, data = logout_payload)
 
         if result:
             self.last_results = [mac.replace("-", ":") for mac in result]
