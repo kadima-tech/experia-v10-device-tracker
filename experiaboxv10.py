@@ -32,7 +32,7 @@ def get_scanner(hass, config):
         return None
 
 
-class ZteH369ADeviceScanner():
+class ZteH369ADeviceScanner(DeviceScanner):
     """This class queries a wireless router running ZTE firmware."""
 
     def __init__(self, config):
