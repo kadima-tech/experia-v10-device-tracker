@@ -20,8 +20,12 @@ device_tracker:
     host: <IP OF ROUTER>
     username: Admin
     password: <PASSWORD>
-    track_new_devices: no
+    new_device_defaults:
+      track_new_devices: False
+      hide_if_away: False
 ```
+
+More info on how to configure/use tracked devices can be found [here](https://www.home-assistant.io/components/device_tracker/).
 
 ## Contributing
 
