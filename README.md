@@ -6,7 +6,7 @@ enable presence detection with their ZTE H369A (Experia V10) box in Home Assista
 ## Setup
 
 1. Clone this repository to your local machine.
-2. Copy the file named ***experiaboxv10.py*** to ***/config/custom_components/device_tracker/*** on your Home Assistant Samba/SSH share. If the folder does not exist, create it.
+2. Copy the directory named ***experiaboxv10*** to ***/config/custom_components/*** on your Home Assistant Samba/SSH share. 
 3. Configure the module with the credentials as listed below.
 4. Reboot Home Assistant. A new file called ***known_devices.yaml*** will be created in your /config directory. This will contain all known devices.
 
@@ -25,7 +25,7 @@ device_tracker:
       hide_if_away: False
 ```
 
-More info on how to configure/use tracked devices can be found [here](https://www.home-assistant.io/components/device_tracker/).
+Note that you can store sensitive data like passwords in a separate file called `secrets.yaml`, see [Storing secrets](https://www.home-assistant.io/docs/configuration/secrets/). More info on how to configure/use tracked devices can be found [here](https://www.home-assistant.io/components/device_tracker/).
 
 ## Contributing
 

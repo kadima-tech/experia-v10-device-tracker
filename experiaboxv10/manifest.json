@@ -1,0 +1,11 @@
+{
+    "domain": "experiaboxv10",
+    "name": "experiaboxv10",
+    "documentation": "https://github.com/kadima-tech/experia-v10-device-tracker",
+    "requirements": [
+    ],
+    "dependencies": [],
+    "codeowners": [
+      "@kadima-tech"
+    ]
+  }
