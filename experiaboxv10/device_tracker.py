@@ -2,10 +2,10 @@
 Support for ZTE H369A router.
 """
 import base64
-import hashlib
 import logging
 import re
 from datetime import datetime, timezone
+from hashlib import sha256
 
 import requests
 import voluptuous as vol
@@ -66,36 +66,33 @@ class ZteH369ADeviceScanner(DeviceScanner):
         _LOGGER.info("Loading wireless clients...")
         session = requests.Session()
 
-        login_payload = {
-            "Username": self.username,
-            "Password": self.password,
-            "action": "login",
-            "Frm_Logintoken": ""
-        }
-
-        logout_payload = {
-            "IF_LogOff": 1,
-            "IF_LanguageSwitch": "",
-            "IF_ModeSwitch": ""
-        }
-
         # Generate a timestamp for the request
         ts = round(datetime.now(timezone.utc).timestamp() * 1000)
 
+        token_url = 'http://{}/function_module/login_module/login_page/logintoken_lua.lua'.format(self.host)
         login_url = 'http://{}'.format(self.host)
         data_url = 'http://{}/common_page/home_AssociateDevs_lua.lua?AccessMode=WLAN&_={}'.format(self.host, ts)
 
         # Login to get the required cookies
         session.get(login_url)
-        session.post(login_url, data = login_payload)
+        result = session.get(token_url)
+        session.post(login_url, data = {
+            "Username": self.username,
+            "Password": sha256((self.password + re.findall('\d+', result.text)[0]).encode('utf-8')).hexdigest(),
+            "action": "login"
+        })
 
         # Get the data
         data_page = session.get(data_url)
         result = self.parse_macs.findall(data_page.text)
-
+        
         # And log back out
         logout_url = 'http://{}'.format(self.host)
-        log_out_page = session.post(logout_url, data = logout_payload)
+        log_out_page = session.post(logout_url, data = {
+            "IF_LogOff": 1,
+            "IF_LanguageSwitch": "",
+            "IF_ModeSwitch": ""
+        })
 
         if result:
             self.last_results = [mac.replace("-", ":") for mac in result]
