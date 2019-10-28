@@ -10,6 +10,7 @@ import xml.etree.ElementTree as ET
 from collections import namedtuple
 
 import requests
+from requests.exceptions import ConnectionError
 import voluptuous as vol
 
 import homeassistant.helpers.config_validation as cv
@@ -110,7 +111,7 @@ class ZteH369ADeviceScanner(DeviceScanner):
             "IF_ModeSwitch": ""
         })
 
-        if True:
+        if result:
             device_list = result_root.find('OBJ_ACCESSDEV_ID')
 
             if device_list is None:
