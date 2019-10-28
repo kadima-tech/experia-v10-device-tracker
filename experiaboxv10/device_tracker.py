@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from hashlib import sha256
 
 import requests
+from requests.exceptions import ConnectionError
 import voluptuous as vol
 
 import homeassistant.helpers.config_validation as cv
@@ -85,7 +86,7 @@ class ZteH369ADeviceScanner(DeviceScanner):
         # Get the data
         data_page = session.get(data_url)
         result = self.parse_macs.findall(data_page.text)
-        
+
         # And log back out
         logout_url = 'http://{}'.format(self.host)
         log_out_page = session.post(logout_url, data = {
