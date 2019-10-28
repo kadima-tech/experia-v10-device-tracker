@@ -95,7 +95,7 @@ class ZteH369ADeviceScanner(DeviceScanner):
         result = session.get(token_url)
         session.post(login_url, data = {
             "Username": self.username,
-            "Password": sha256((self.password + re.findall('\d+', result.text)[0]).encode('utf-8')).hexdigest(),
+            "Password": sha256((self.password + re.findall(r'\d+', result.text)[0]).encode('utf-8')).hexdigest(),
             "action": "login"
         })
 
