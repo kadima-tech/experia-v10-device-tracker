@@ -6,6 +6,8 @@ import logging
 import re
 from datetime import datetime, timezone
 from hashlib import sha256
+import xml.etree.ElementTree as ET
+from collections import namedtuple
 
 import requests
 from requests.exceptions import ConnectionError
@@ -24,6 +26,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_USERNAME): cv.string
 })
 
+Device = namedtuple('Device', ['mac', 'name', 'ip'])
 
 def get_scanner(hass, config):
     """Validate the configuration and return a ZTE AP scanner."""
@@ -41,23 +44,36 @@ class ZteH369ADeviceScanner(DeviceScanner):
         host = config[CONF_HOST]
         username, password = config[CONF_USERNAME], config[CONF_PASSWORD]
 
-        self.parse_macs = re.compile('[0-9A-Fa-f]{2}\:[0-9A-Fa-f]{2}\:[0-9A-Fa-f]{2}\:[0-9A-Fa-f]{2}\:[0-9A-Fa-f]{2}\:[0-9A-Fa-f]{2}')
-
         self.host = host
         self.username = username
         self.password = password
 
-        self.last_results = {}
+        self.last_results = []
         self.success_init = self._update_info()
 
     def scan_devices(self):
         """Scan for new devices and return a list with found device IDs."""
         self._update_info()
-        return self.last_results
+        return [device.mac for device in self.last_results]
 
     # pylint: disable=no-self-use
     def get_device_name(self, device):
-        """Get firmware doesn't save the name of the wireless device."""
+        """Return the name of the given device or None if we don't know."""
+        filter_named = [result.name for result in self.last_results
+                        if result.mac == device]
+
+        if filter_named:
+            return filter_named[0]
+        return None
+
+    def get_extra_attributes(self, device):
+        """Return the extra attibutes of the given device."""
+        filter_device = next((
+            result for result in self.last_results
+            if result.mac == device), None)
+
+        if filter_device:
+            return {'ip': filter_device.ip}
         return None
 
     def _update_info(self):
@@ -85,7 +101,7 @@ class ZteH369ADeviceScanner(DeviceScanner):
 
         # Get the data
         data_page = session.get(data_url)
-        result = self.parse_macs.findall(data_page.text)
+        result_root = ET.fromstring(data_page.text)
 
         # And log back out
         logout_url = 'http://{}'.format(self.host)
@@ -96,7 +112,26 @@ class ZteH369ADeviceScanner(DeviceScanner):
         })
 
         if result:
-            self.last_results = [mac.replace("-", ":") for mac in result]
+            device_list = result_root.find('OBJ_ACCESSDEV_ID')
+
+            if device_list is None:
+                return False
+
+            results = []
+            for device in device_list:
+                keys = device.findall('ParaName')
+                values = device.findall('ParaValue')
+
+                result = {}
+                for index, key in enumerate(keys):
+                    value = values[index]
+
+                    if key.text in ['HostName', 'MACAddress', 'IPAddress']:
+                        result[key.text] = value.text or ''
+
+                results.append(Device(result['MACAddress'].upper(),result['HostName'], result['IPAddress']))
+
+            self.last_results = results
             return True
 
         return False
