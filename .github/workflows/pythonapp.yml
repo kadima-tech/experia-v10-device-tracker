@@ -9,10 +9,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    - name: Set up Python 2.7
+    - name: Set up Python 3.7
       uses: actions/setup-python@v1
       with:
-        python-version: 2.7
+        python-version: 3.7
 #     Outside of dev-dependencies, there's nothing to install for Home Assistant drivers.
 #    - name: Install dependencies
 #      run: |
