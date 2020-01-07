@@ -1,7 +1,6 @@
 """
 Support for ZTE H369A router.
 """
-import base64
 import logging
 import re
 from datetime import datetime, timezone
@@ -27,6 +26,29 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 })
 
 Device = namedtuple('Device', ['mac', 'name', 'ip'])
+
+def parse_xml(data):
+    result_root = ET.fromstring(data)
+    device_list = result_root.find('OBJ_ACCESSDEV_ID')
+
+    if device_list is None:
+        return False
+
+    results = []
+    for device in device_list:
+        keys = device.findall('ParaName')
+        values = device.findall('ParaValue')
+
+        result = {}
+        for index, key in enumerate(keys):
+            value = values[index]
+
+            if key.text in ['HostName', 'MACAddress', 'IPAddress']:
+                result[key.text] = value.text or ''
+
+        results.append(Device(result['MACAddress'].upper(), result['HostName'], result['IPAddress']))
+
+    return results
 
 def get_scanner(hass, config):
     """Validate the configuration and return a ZTE AP scanner."""
@@ -83,55 +105,48 @@ class ZteH369ADeviceScanner(DeviceScanner):
         _LOGGER.info("Loading wireless clients...")
         session = requests.Session()
 
+        token_url = 'http://{}/function_module/login_module/login_page/logintoken_lua.lua'.format(self.host)
+
+        login_url = 'http://{}'.format(self.host)
+
         # Generate a timestamp for the request
         ts = round(datetime.now(timezone.utc).timestamp() * 1000)
-
-        token_url = 'http://{}/function_module/login_module/login_page/logintoken_lua.lua'.format(self.host)
-        login_url = 'http://{}'.format(self.host)
         data_url = 'http://{}/common_page/home_AssociateDevs_lua.lua?AccessMode=WLAN&_={}'.format(self.host, ts)
+        logout_url = 'http://{}'.format(self.host)
 
         # Login to get the required cookies
         session.get(login_url)
         result = session.get(token_url)
-        session.post(login_url, data = {
+
+        login_payload = {
             "Username": self.username,
             "Password": sha256((self.password + re.findall(r'\d+', result.text)[0]).encode('utf-8')).hexdigest(),
             "action": "login"
-        })
+        }
 
-        # Get the data
-        data_page = session.get(data_url)
-        result_root = ET.fromstring(data_page.text)
-
-        # And log back out
-        logout_url = 'http://{}'.format(self.host)
-        log_out_page = session.post(logout_url, data = {
+        logout_payload = {
             "IF_LogOff": 1,
             "IF_LanguageSwitch": "",
             "IF_ModeSwitch": ""
-        })
+        }
 
-        if result:
-            device_list = result_root.find('OBJ_ACCESSDEV_ID')
+        # If the router is on a older version, the token_url does not exist
+        # Use the 'old' way of getting the data (Tested on V1.01.01T01.9)
+        if result.status_code == 404:
+            login_payload["Password"] = self.password
+            login_payload["Frm_Logintoken"] = ""
 
-            if device_list is None:
-                return False
+        session.post(login_url, data=login_payload)
 
-            results = []
-            for device in device_list:
-                keys = device.findall('ParaName')
-                values = device.findall('ParaValue')
+        # Get the data
+        data_page = session.get(data_url)
 
-                result = {}
-                for index, key in enumerate(keys):
-                    value = values[index]
+        # And log back out
+        session.post(logout_url, data=logout_payload)
 
-                    if key.text in ['HostName', 'MACAddress', 'IPAddress']:
-                        result[key.text] = value.text or ''
-
-                results.append(Device(result['MACAddress'].upper(),result['HostName'], result['IPAddress']))
-
-            self.last_results = results
+        data = data_page.text
+        if result or result.status_code == 404:
+            self.last_results = parse_xml(data)
             return True
 
         return False
