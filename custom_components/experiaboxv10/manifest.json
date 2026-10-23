@@ -1,0 +1,17 @@
+{
+  "domain": "experiaboxv10",
+  "name": "Experia Box V10",
+  "categories": [
+    "presence_location.network_presence",
+    "computers_network.routers_network"
+  ],
+  "codeowners": ["@kadima-tech", "@sjaakiejj"],
+  "config_flow": true,
+  "documentation": "https://github.com/kadima-tech/experia-v10-device-tracker",
+  "integration_type": "hub",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/kadima-tech/experia-v10-device-tracker/issues",
+  "loggers": ["custom_components.experiaboxv10"],
+  "requirements": [],
+  "version": "2.0.0"
+}

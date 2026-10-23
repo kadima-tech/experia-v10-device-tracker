@@ -1,0 +1,84 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to the Experia Box",
+        "description": "Log in to the ZTE H369A (KPN or Telfort Experia Box V10) on your local network. The username is often Admin.",
+        "data": {
+          "host": "Host",
+          "username": "Username",
+          "password": "Password"
+        },
+        "data_description": {
+          "host": "IP address or hostname of the router, for example 192.168.2.254.",
+          "username": "Username for the router web interface.",
+          "password": "Password for the router web interface."
+        }
+      },
+      "reconfigure": {
+        "title": "Update the Experia Box connection",
+        "description": "Change the host or login. The new details are checked before they are saved.",
+        "data": {
+          "host": "Host",
+          "username": "Username",
+          "password": "Password"
+        },
+        "data_description": {
+          "host": "IP address or hostname of the router.",
+          "username": "Username for the router web interface.",
+          "password": "Password for the router web interface."
+        }
+      },
+      "reauth_confirm": {
+        "title": "Reauthenticate the Experia Box",
+        "description": "The router at {name} rejected the saved login. Enter the current username and password.",
+        "data": {
+          "username": "Username",
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not connect to the router. Check the host and that Home Assistant can reach it on the local network.",
+      "invalid_auth": "The router rejected the username or password.",
+      "unknown": "The router returned a response this integration does not understand. The firmware may be unsupported."
+    },
+    "abort": {
+      "already_configured": "This router is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Experia Box options",
+        "description": "How often to ask the router for clients, and how long a client stays home after it disappears from that list.",
+        "data": {
+          "interval_seconds": "Scan interval",
+          "consider_home": "Consider home"
+        },
+        "data_description": {
+          "interval_seconds": "Seconds between polls. The minimum is 10, because each poll logs in and out of the router.",
+          "consider_home": "Seconds to keep a client home after the router stops listing it. This covers phones that sleep while they are still at home. Use 0 to mark them away on the next poll."
+        }
+      }
+    }
+  },
+  "issues": {
+    "yaml_imported": {
+      "title": "Experia Box YAML configuration was imported",
+      "description": "The device tracker for {host} was imported from configuration.yaml and can now be managed in the UI.\n\nRemove the experiaboxv10 entry from the device_tracker section of configuration.yaml and restart Home Assistant. Also remove its devices from known_devices.yaml. Those entries are no longer updated, and a device whose id is still the MAC address can collide with the new entity.\n\nNew entities are disabled until you enable them, unless Home Assistant already knows that MAC address from another integration."
+    },
+    "yaml_import_cannot_connect": {
+      "title": "Could not import the Experia Box configuration",
+      "description": "Home Assistant could not reach the router at {host} while importing configuration.yaml. Check the host, then restart Home Assistant, or add the router from Settings > Devices & services."
+    },
+    "yaml_import_invalid_auth": {
+      "title": "Could not import the Experia Box configuration",
+      "description": "The router at {host} rejected the username or password from configuration.yaml. Correct them and restart Home Assistant, or add the router from the UI."
+    },
+    "yaml_import_unknown": {
+      "title": "Could not import the Experia Box configuration",
+      "description": "The router at {host} returned a response this integration does not understand. The firmware may differ from the two variants this release supports."
+    }
+  }
+}
