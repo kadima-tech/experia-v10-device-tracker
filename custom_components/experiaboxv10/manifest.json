@@ -1,10 +1,6 @@
 {
   "domain": "experiaboxv10",
   "name": "Experia Box V10",
-  "categories": [
-    "presence_location.network_presence",
-    "computers_network.routers_network"
-  ],
   "codeowners": ["@kadima-tech", "@sjaakiejj"],
   "config_flow": true,
   "documentation": "https://github.com/kadima-tech/experia-v10-device-tracker",
