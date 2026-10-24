@@ -1,1 +1,6 @@
-requests==2.20.0
+# HTTP client used to log in to the router.
+# Home Assistant Core 2026.10 already installs requests==2.34.2, so
+# manifest.json does not repeat it. Custom integrations should not pin
+# packages that Core already provides.
+# https://developers.home-assistant.io/docs/creating_integration_manifest/
+requests==2.34.2

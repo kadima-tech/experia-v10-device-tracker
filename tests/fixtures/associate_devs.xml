@@ -1,0 +1,30 @@
+<ajax_response_xml_root>
+  <IF_ERRORPARAM>SUCC</IF_ERRORPARAM>
+  <IF_ERRORTYPE>SUCC</IF_ERRORTYPE>
+  <IF_ERRORSTR>SUCC</IF_ERRORSTR>
+  <IF_ERRORID>0</IF_ERRORID>
+  <OBJ_ACCESSDEV_ID>
+    <Instance>
+      <ParaName>_InstID</ParaName>
+      <ParaValue>DEV.Hosts.HI337</ParaValue>
+      <ParaName>IPAddress</ParaName>
+      <ParaValue>192.168.2.16</ParaValue>
+      <ParaName>HostName</ParaName>
+      <ParaValue>Samsung</ParaValue>
+      <ParaName>MACAddress</ParaName>
+      <ParaValue>40:5a:a4:6b:33:4b</ParaValue>
+    </Instance>
+    <Instance>
+      <ParaName>IPAddress</ParaName>
+      <ParaValue>192.168.2.20</ParaValue>
+      <ParaName>HostName</ParaName>
+      <ParaValue></ParaValue>
+      <ParaName>MACAddress</ParaName>
+      <ParaValue>AA-BB-CC-DD-EE-FF</ParaValue>
+    </Instance>
+    <Instance>
+      <ParaName>HostName</ParaName>
+      <ParaValue>NoMac</ParaValue>
+    </Instance>
+  </OBJ_ACCESSDEV_ID>
+</ajax_response_xml_root>

@@ -1,0 +1,4 @@
+# Pins Home Assistant 2026.10.2, the newest core release this plugin
+# published against on 23 October 2026. Stable core that day is 2026.10.3.
+pytest-homeassistant-custom-component==0.13.373
+ruff==0.17.2

@@ -1,0 +1,110 @@
+{
+  "status": {
+    "wifi": [
+      {
+        "Key": "40:5A:A4:6B:33:4B",
+        "DiscoverySource": "import",
+        "Name": "Samsung",
+        "DeviceType": "Mobile",
+        "Active": true,
+        "Tags": "lan edev mac physical wifi events security ipv4 ipv6 dhcp",
+        "FirstSeen": "2026-09-30T18:02:11Z",
+        "LastConnection": "2026-10-24T11:20:04Z",
+        "LastChanged": "2026-10-24T09:12:45Z",
+        "IPAddress": "192.168.2.16",
+        "IPAddressSource": "DHCP",
+        "PhysAddress": "40:5A:A4:6B:33:4B",
+        "Layer2Interface": "vap5g0priv",
+        "InterfaceName": "vap5g0priv",
+        "SignalStrength": -58,
+        "OperatingFrequencyBand": "5GHz",
+        "MaxDownlinkRateReached": 866000,
+        "MaxUplinkRateReached": 866000,
+        "Index": "41",
+        "ULinks": [{"Key": "vap5g0priv", "Type": "wifi"}]
+      },
+      {
+        "Key": "C0:D7:AA:89:7A:A8",
+        "DiscoverySource": "ssw",
+        "Name": "SW2-897AA8",
+        "DeviceType": "InternetGatewayDevice",
+        "Active": true,
+        "Tags": "lan edev mac physical wifi events security ipv4 ipv6 dhcp manageable upnp",
+        "IPAddress": "192.168.2.7",
+        "IPAddressSource": "DHCP",
+        "PhysAddress": "C0:D7:AA:89:7A:A8",
+        "Layer2Interface": "ETH2",
+        "InterfaceName": "ETH2",
+        "Index": "979",
+        "ULinks": [{"Key": "_C0:D7:AA:25:AA:0F_vap5g0priv", "Type": "wifi"}]
+      },
+      {
+        "Key": "AA:BB:CC:DD:EE:FF",
+        "Name": "Laptop",
+        "Active": true,
+        "Tags": "lan edev mac physical wifi ipv4 dhcp",
+        "IPAddress": "192.168.2.20",
+        "PhysAddress": "AA:BB:CC:DD:EE:FF",
+        "Index": "52",
+        "ULinks": [{"Key": "vap2g0priv", "Type": "wifi"}]
+      }
+    ],
+    "ethernet": [
+      {
+        "Key": "68:54:ED:46:58:EE",
+        "DiscoverySource": "import",
+        "Name": "Device",
+        "DeviceType": "Mobile",
+        "Active": true,
+        "Tags": "lan edev mac physical eth security ipv4 ipv6 wan-blocked",
+        "IPAddress": "192.168.2.201",
+        "IPAddressSource": "Static",
+        "PhysAddress": "68:54:ED:46:58:EE",
+        "Layer2Interface": "ETH0",
+        "InterfaceName": "ETH0",
+        "Index": "2",
+        "LLinks": [],
+        "ULinks": [{"Key": "ETH0", "Type": "ethernet"}]
+      },
+      {
+        "Key": "C4:EB:42:06:90:77",
+        "Name": "DIW7022-69077",
+        "DeviceType": "Set-top Box",
+        "Active": true,
+        "Tags": "lan edev mac physical eth security ipv4 ipv6 dhcp stb mdns upnp events",
+        "IPAddress": "192.168.2.15",
+        "PhysAddress": "C4:EB:42:06:90:77",
+        "Index": "7",
+        "ULinks": [{"Key": "_C0:D7:AA:25:AA:0F_ETH1", "Type": "ethernet"}]
+      },
+      {
+        "Key": "38:94:ED:A6:BE:6C",
+        "Name": "Ghost",
+        "Active": true,
+        "Tags": "lan edev mac physical eth ipv4",
+        "IPAddress": "192.168.2.13",
+        "PhysAddress": "38:94:ED:A6:BE:6C",
+        "Index": "9",
+        "ULinks": []
+      },
+      {
+        "Key": "AA:BB:CC:DD:EE:FF",
+        "Name": "Laptop",
+        "Active": true,
+        "Tags": "lan edev mac physical eth ipv4 dhcp",
+        "IPAddress": "192.168.2.20",
+        "PhysAddress": "AA:BB:CC:DD:EE:FF",
+        "Index": "52",
+        "ULinks": [{"Key": "ETH3", "Type": "ethernet"}]
+      },
+      {
+        "Key": "uuid:b0522cce-c4c7-3ae7-92c3-e2a1ceae6b4a",
+        "Name": "UPnP service",
+        "Active": true,
+        "Tags": "lan upnp",
+        "Index": "11",
+        "ULinks": [{"Key": "ETH1", "Type": "ethernet"}]
+      }
+    ]
+  }
+}
