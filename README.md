@@ -59,9 +59,10 @@ A client that is away when Home Assistant restarts is restored as `not_home` ins
 
 ### Firmware login
 
-Two firmware variants are supported:
+Three firmware variants are supported:
 
-* **Current firmware.** `logintoken_lua.lua` returns a page. The password is sent as `sha256(password + the first integer on that page)`.
+* **KPN WebUI firmware (2026).** `http://<router>/` serves the Flutter "KPN WebUI". The integration uses the box's JSON API on `/ws` instead: it logs in with `sah.Device.Information.createContext` (username `admin`; the `Admin` default is accepted), reads active Wi-Fi and Ethernet devices with `Devices.get`, and releases the session afterwards. It is also tried when both legacy login URLs return HTTP 404.
+* **Token firmware.** `logintoken_lua.lua` returns a page. The password is sent as `sha256(password + the first integer on that page)`.
 * **Older firmware, including V1.01.01T01.9.** That URL returns HTTP 404. The password is sent as plaintext with an empty `Frm_Logintoken`.
 
 The first-integer rule is unchanged from the previous release. A token page whose first number is not the login token will not authenticate.
@@ -107,7 +108,7 @@ ruff format --check .
 pytest
 ```
 
-The tests run on Python 3.14 with `pytest-homeassistant-custom-component` 0.13.373, which installs Home Assistant 2026.10.2. Router HTTP is replaced with scripted responses, including both firmware login variants. Nothing in the test suite contacts a router.
+The tests run on Python 3.14 with `pytest-homeassistant-custom-component` 0.13.373, which installs Home Assistant 2026.10.2. Router HTTP is replaced with scripted responses, including all three firmware variants. Nothing in the test suite contacts a router.
 
 CI runs Ruff, pytest, [hassfest](https://github.com/home-assistant/actions), and [HACS validation](https://github.com/hacs/action).
 
@@ -122,7 +123,7 @@ Verified with mocks:
 
 Not verified, because there is no router in this environment:
 
-* Either firmware variant against a real box, or any firmware other than the two above.
+* The legacy firmware variants against a real box, or any firmware other than the three above. The KPN WebUI support is built from the web app's own API definitions and still needs a live test.
 * Whether extenders, guest Wi-Fi, or Ethernet clients show up in `AccessMode=WLAN`.
 * Whether a fixed DHCP reservation stays in that table after the device leaves.
 * The exact entity id Home Assistant assigns when an existing `known_devices.yaml` entry is still present.

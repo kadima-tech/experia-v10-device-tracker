@@ -2,19 +2,28 @@
 
 from __future__ import annotations
 
+import json
 from hashlib import sha256
 
 import pytest
 from tests.helpers import (
     HOST,
+    LAPTOP_MAC,
     PASSWORD,
     SAMSUNG_MAC,
     USERNAME,
+    WS_CONTEXT_ID,
+    WS_COOKIE,
+    FakeResponse,
+    FakeSession,
     connection_error,
     install_router,
     legacy_firmware,
     login_post,
     token_firmware,
+    unknown_home,
+    webui_home,
+    ws_router,
 )
 
 from custom_components.experiaboxv10.router import (
@@ -25,6 +34,7 @@ from custom_components.experiaboxv10.router import (
     normalize_host,
     normalize_mac,
     parse_clients,
+    parse_ws_clients,
 )
 
 
@@ -144,3 +154,158 @@ def test_connection_error_is_reported_without_a_partial_result(
 
     with pytest.raises(CannotConnect):
         fetch_clients(HOST, USERNAME, PASSWORD)
+
+
+# KPN WebUI firmware
+
+
+def _ws_methods(session: FakeSession) -> list[str]:
+    return [call.service_method for call in session.ws_calls]
+
+
+def test_webui_firmware_logs_in_lists_devices_and_releases_the_context(
+    monkeypatch: pytest.MonkeyPatch, ws_devices_json: str
+) -> None:
+    """The Flutter UI at ``/`` selects the ``/ws`` API, not the legacy pages."""
+    sessions = install_router(monkeypatch, webui_home(), ws_router(ws_devices_json))
+
+    clients = fetch_clients(HOST, USERNAME, PASSWORD)
+
+    assert [(client.mac, client.name, client.ip) for client in clients] == [
+        (SAMSUNG_MAC, "Samsung", "192.168.2.16"),
+        ("c0:d7:aa:89:7a:a8", "SW2-897AA8", "192.168.2.7"),
+        (LAPTOP_MAC, "Laptop", "192.168.2.20"),
+        ("68:54:ed:46:58:ee", "Device", "192.168.2.201"),
+        ("c4:eb:42:06:90:77", "DIW7022-69077", "192.168.2.15"),
+    ]
+    session = sessions[0]
+    assert not any("logintoken" in url for _method, url, _data in session.calls)
+    assert _ws_methods(session) == [
+        "sah.Device.Information.createContext",
+        "Devices.get",
+        "sah.Device.Information.releaseContext",
+    ]
+    assert all(
+        call.url == "http://192.168.2.254/ws/NeMo/Intf/lan:getMIBs"
+        for call in session.ws_calls
+    )
+
+    login, devices, logout = session.ws_calls
+    # The web app always logs in as lowercase "admin" with the plain password.
+    assert login.body["parameters"] == {
+        "applicationName": "webui",
+        "username": "admin",
+        "password": PASSWORD,
+    }
+    assert login.headers["Authorization"] == "X-Sah-Login"
+    assert login.headers["Content-Type"] == "application/x-sah-ws-4-call+js"
+
+    assert devices.headers == {
+        "Content-Type": "application/x-sah-ws-4-call+json",
+        "Authorization": f"X-Sah {WS_CONTEXT_ID}",
+        "X-Context": WS_CONTEXT_ID,
+        "Cookie": WS_COOKIE,
+    }
+    assert devices.body["parameters"]["flags"] == "full_links"
+    assert set(devices.body["parameters"]["expression"]) == {"wifi", "ethernet"}
+
+    assert logout.headers["Authorization"] == f"X-Sah-Logout {WS_CONTEXT_ID}"
+    assert logout.headers["X-Context"] == WS_CONTEXT_ID
+    assert logout.body["parameters"] == {"applicationName": "webui"}
+
+
+def test_webui_firmware_rejects_a_wrong_password_as_invalid_auth(
+    monkeypatch: pytest.MonkeyPatch, ws_devices_json: str
+) -> None:
+    """A 401 ``Permission denied`` from createContext is a bad password."""
+    sessions = install_router(monkeypatch, webui_home(), ws_router(ws_devices_json))
+
+    with pytest.raises(InvalidAuth):
+        fetch_clients(HOST, USERNAME, "wrong")
+
+    # Nothing to release: no context was created.
+    assert _ws_methods(sessions[0]) == ["sah.Device.Information.createContext"]
+
+
+def test_webui_firmware_login_errors_in_a_200_body_are_invalid_auth(
+    monkeypatch: pytest.MonkeyPatch, ws_devices_json: str
+) -> None:
+    """Some SoftAtHome builds answer 200 with an ``errors`` list instead."""
+    denied = FakeResponse(
+        200,
+        json.dumps(
+            {
+                "status": None,
+                "errors": [{"error": 13, "description": "Permission denied"}],
+            }
+        ),
+    )
+    install_router(monkeypatch, webui_home(), ws_router(ws_devices_json, login=denied))
+
+    with pytest.raises(InvalidAuth):
+        fetch_clients(HOST, USERNAME, PASSWORD)
+
+
+def test_webui_firmware_releases_the_context_when_the_device_list_fails(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Logout runs in ``finally`` even when the list is unusable."""
+    sessions = install_router(monkeypatch, webui_home(), ws_router("not json"))
+
+    with pytest.raises(UnexpectedResponse):
+        fetch_clients(HOST, USERNAME, PASSWORD)
+
+    assert _ws_methods(sessions[0])[-1] == "sah.Device.Information.releaseContext"
+
+
+def test_unrecognised_home_page_without_legacy_pages_tries_the_ws_api(
+    monkeypatch: pytest.MonkeyPatch, ws_devices_json: str
+) -> None:
+    """Both legacy login URLs returning 404 means the box only has ``/ws``."""
+    sessions = install_router(monkeypatch, unknown_home(), ws_router(ws_devices_json))
+
+    clients = fetch_clients(HOST, USERNAME, PASSWORD)
+
+    assert SAMSUNG_MAC in [client.mac for client in clients]
+    assert any("logintoken" in url for _method, url, _data in sessions[0].calls)
+    assert _ws_methods(sessions[0])[-1] == "sah.Device.Information.releaseContext"
+
+
+def test_legacy_firmware_never_touches_the_ws_api(
+    monkeypatch: pytest.MonkeyPatch, devices_xml: str
+) -> None:
+    """Old firmware keeps the old flow, with no extra requests."""
+    sessions = install_router(monkeypatch, token_firmware(devices_xml))
+
+    fetch_clients(HOST, USERNAME, PASSWORD)
+
+    assert sessions[0].ws_calls == []
+
+
+def test_parse_ws_clients_skips_ghosts_duplicates_and_non_mac_keys(
+    ws_devices_json: str,
+) -> None:
+    """Entries without an upstream link or a MAC are not trackers."""
+    clients = parse_ws_clients(json.loads(ws_devices_json))
+
+    macs = [client.mac for client in clients]
+    assert "38:94:ed:a6:be:6c" not in macs
+    assert macs.count(LAPTOP_MAC) == 1
+    assert len(macs) == 5
+
+
+def test_parse_ws_clients_maps_a_permission_error_to_invalid_auth() -> None:
+    """An expired context comes back as error 13."""
+    with pytest.raises(InvalidAuth):
+        parse_ws_clients(
+            {
+                "status": None,
+                "errors": [{"error": 13, "description": "Permission denied"}],
+            }
+        )
+
+
+def test_parse_ws_clients_rejects_a_body_without_status() -> None:
+    """Anything else is an unknown firmware response."""
+    with pytest.raises(UnexpectedResponse):
+        parse_ws_clients({"result": {}})

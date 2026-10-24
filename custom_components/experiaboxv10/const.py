@@ -19,4 +19,11 @@ CONF_SCAN_INTERVAL = "interval_seconds"
 TOKEN_PATH = "/function_module/login_module/login_page/logintoken_lua.lua"
 DEVICES_PATH = "/common_page/home_AssociateDevs_lua.lua"
 
+# Newer firmware serves the Flutter "KPN WebUI" and a SoftAtHome JSON API.
+# The web app posts every call to this one URI; the body names the service.
+WS_PATH = "/ws/NeMo/Intf/lan:getMIBs"
+# The web app hardcodes this username in its login call.
+WS_USERNAME = "admin"
+WS_APPLICATION_NAME = "webui"
+
 DEFAULT_SCAN_INTERVAL_TD = timedelta(seconds=DEFAULT_SCAN_INTERVAL)

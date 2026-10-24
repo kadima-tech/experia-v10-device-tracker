@@ -25,3 +25,9 @@ def devices_xml() -> str:
 def empty_devices_xml() -> str:
     """Router response with an empty client list."""
     return (FIXTURES / "associate_devs_empty.xml").read_text(encoding="utf-8")
+
+
+@pytest.fixture
+def ws_devices_json() -> str:
+    """KPN WebUI ``Devices.get`` response for active Wi-Fi and Ethernet devices."""
+    return (FIXTURES / "ws_active_devices.json").read_text(encoding="utf-8")
