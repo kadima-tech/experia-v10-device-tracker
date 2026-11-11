@@ -20,6 +20,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers import issue_registry as ir
+from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC, DeviceInfo
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -188,6 +189,15 @@ class ExperiaScannerEntity(CoordinatorEntity[ExperiaCoordinator], ScannerEntity)
         self._attr_hostname = name or None
         self._attr_ip_address = client.ip if client and client.ip else None
         self._attr_name = name or self._mac
+        # Home Assistant 2026.10 ignores this: ScannerEntity.device_info is
+        # final and always None, and core still creates the client device.
+        # From 2026.11 a tracker without device info logs a warning and that
+        # fallback is removed in 2027.11. The name stays on the entity so
+        # entity ids do not change for existing 2026.10 installs.
+        self._attr_device_info = DeviceInfo(
+            connections={(CONNECTION_NETWORK_MAC, self._mac)},
+            name=name or self._mac,
+        )
 
 
 def _seconds(value: object) -> int:

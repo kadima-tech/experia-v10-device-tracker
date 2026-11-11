@@ -66,7 +66,7 @@
   "issues": {
     "yaml_imported": {
       "title": "Experia Box YAML configuration was imported",
-      "description": "The device tracker for {host} was imported from configuration.yaml and can now be managed in the UI.\n\nRemove the experiaboxv10 entry from the device_tracker section of configuration.yaml and restart Home Assistant. Also remove its devices from known_devices.yaml. Those entries are no longer updated, and a device whose id is still the MAC address can collide with the new entity.\n\nNew entities are disabled until you enable them, unless Home Assistant already knows that MAC address from another integration."
+      "description": "The device tracker for {host} was imported from configuration.yaml and can now be managed in the UI.\n\nRemove the experiaboxv10 entry from the device_tracker section of configuration.yaml and restart Home Assistant. Also remove its devices from known_devices.yaml. Those entries are no longer updated, and a device whose id is still the MAC address can collide with the new entity.\n\nNew entities are disabled until you enable them. On Home Assistant 2026.10, a client whose MAC address is already known to another integration starts enabled. From Home Assistant 2026.11, every new client starts disabled, including those."
     },
     "yaml_import_cannot_connect": {
       "title": "Could not import the Experia Box configuration",
