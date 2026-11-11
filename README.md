@@ -53,7 +53,7 @@ Options, on the integration's **Configure** page:
 
 The router is queried at `home_AssociateDevs_lua.lua?AccessMode=WLAN`. Every client in that response becomes a device tracker.
 
-Home Assistant 2026.10 disables a new router tracker until that MAC address is already known to another integration, or until you enable the entity yourself. Enable the ones you want under **Settings → Devices & services → Entities**. Filter on the integration and show disabled entities.
+Home Assistant 2026.10 disables a new router tracker until that MAC address is already known to another integration, or until you enable the entity yourself. From Home Assistant 2026.11, every new client starts disabled until you enable it, even when another integration already knows the MAC address. Trackers that already exist keep their enabled or disabled state. Enable the ones you want under **Settings → Devices & services → Entities**. Filter on the integration and show disabled entities.
 
 A client that is away when Home Assistant restarts is restored as `not_home` instead of being removed.
 
@@ -108,7 +108,7 @@ ruff format --check .
 pytest
 ```
 
-The tests run on Python 3.14 with `pytest-homeassistant-custom-component` 0.13.373, which installs Home Assistant 2026.10.2. Router HTTP is replaced with scripted responses, including all three firmware variants. Nothing in the test suite contacts a router.
+The tests run on Python 3.14.10 with `pytest-homeassistant-custom-component` 0.13.375, which installs Home Assistant 2026.10.4. Router HTTP is replaced with scripted responses, including all three firmware variants. Nothing in the test suite contacts a router.
 
 CI runs Ruff, pytest, [hassfest](https://github.com/home-assistant/actions), and [HACS validation](https://github.com/hacs/action).
 
