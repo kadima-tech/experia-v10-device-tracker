@@ -1,3 +1,4 @@
-"""Pytest plugins shared by the integration tests."""
+"""Project pytest configuration.
 
-pytest_plugins = "pytest_homeassistant_custom_component"
+``pytest-homeassistant`` registers its plugin through a pytest entry point.
+"""

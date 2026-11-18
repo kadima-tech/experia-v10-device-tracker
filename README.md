@@ -10,7 +10,7 @@ The integration is [MIT licensed](LICENSE.md).
 
 Home Assistant **2026.10** or newer.
 
-That is the stable release this version was checked against. The device tracker code follows the 2026.10 config-entry and `ScannerEntity` APIs. Legacy `device_tracker` platforms are scheduled for removal in Home Assistant 2027.5, so setup is a config flow, with a one-time import of an existing YAML platform.
+The minimum stays 2026.10.0. Tests run on Home Assistant 2026.11.1. The device tracker code follows the 2026.10 config-entry and `ScannerEntity` APIs. Legacy `device_tracker` platforms are scheduled for removal in Home Assistant 2027.5, so setup is a config flow, with a one-time import of an existing YAML platform.
 
 ## Install
 
@@ -53,7 +53,7 @@ Options, on the integration's **Configure** page:
 
 The router is queried at `home_AssociateDevs_lua.lua?AccessMode=WLAN`. Every client in that response becomes a device tracker.
 
-Home Assistant 2026.10 disables a new router tracker until that MAC address is already known to another integration, or until you enable the entity yourself. Enable the ones you want under **Settings → Devices & services → Entities**. Filter on the integration and show disabled entities.
+Home Assistant 2026.10 disables a new router tracker until that MAC address is already known to another integration, or until you enable the entity yourself. From Home Assistant 2026.11, every new client starts disabled until you enable it, even when another integration already knows the MAC address. Trackers that already exist keep their enabled or disabled state. Enable the ones you want under **Settings → Devices & services → Entities**. Filter on the integration and show disabled entities.
 
 A client that is away when Home Assistant restarts is restored as `not_home` instead of being removed.
 
@@ -108,7 +108,7 @@ ruff format --check .
 pytest
 ```
 
-The tests run on Python 3.14 with `pytest-homeassistant-custom-component` 0.13.373, which installs Home Assistant 2026.10.2. Router HTTP is replaced with scripted responses, including all three firmware variants. Nothing in the test suite contacts a router.
+The tests run on Python 3.14.10 with `pytest-homeassistant` 2026.11.1, which installs Home Assistant 2026.11.1. Router HTTP is replaced with scripted responses, including all three firmware variants. Nothing in the test suite contacts a router.
 
 CI runs Ruff, pytest, [hassfest](https://github.com/home-assistant/actions), and [HACS validation](https://github.com/hacs/action).
 
@@ -119,7 +119,7 @@ Verified with mocks:
 * Token login and the V1.01.01T01.9 plaintext login, including a 404 body that contains digits and one that does not.
 * Parsing of the associated-client XML, including a missing MAC.
 * Config flow success, connection failure, rejected login, a duplicate host, reconfigure, reauth, and options.
-* Entity state for a known MAC, disabled entities for an unknown MAC, the consider-home grace period, a client that appears after startup, an unreachable router, unload, and YAML import.
+* New clients start disabled, including a MAC already known to another integration. Once a tracker is enabled: entity state, the consider-home grace period, a client that appears after startup, an unreachable router, unload, and YAML import.
 
 Not verified, because there is no router in this environment:
 

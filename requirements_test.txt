@@ -1,4 +1,5 @@
-# Pins Home Assistant 2026.10.2, the newest core release this plugin
-# published against on 23 October 2026. Stable core that day is 2026.10.3.
-pytest-homeassistant-custom-component==0.13.373
-ruff==0.17.2
+# pytest-homeassistant 2026.11.1 installs Home Assistant 2026.11.1.
+# That is the newest core release published on or before 2026-11-11.
+# Home Assistant 2026.11.2 was published on 2026-11-16.
+pytest-homeassistant==2026.11.1
+ruff==0.17.4

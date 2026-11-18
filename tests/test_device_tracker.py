@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import pytest
 import requests
 from homeassistant.components.device_tracker import DOMAIN as DEVICE_TRACKER_DOMAIN
 from homeassistant.config_entries import ConfigEntryState
@@ -17,7 +18,7 @@ from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers import issue_registry as ir
 from homeassistant.setup import async_setup_component
-from pytest_homeassistant_custom_component.common import MockConfigEntry
+from pytest_homeassistant.common import MockConfigEntry
 from tests.helpers import (
     HOST,
     LAPTOP_MAC,
@@ -56,12 +57,42 @@ def _entry(**options) -> MockConfigEntry:
     )
 
 
-async def test_known_mac_is_home_and_unknown_mac_is_disabled(
+async def test_new_clients_start_disabled_even_when_the_mac_is_known(
     hass, devices_xml, monkeypatch
 ) -> None:
-    """A MAC already known to Home Assistant is tracked. Others start disabled."""
+    """Home Assistant 2026.11 disables every new scanner, including a known MAC."""
     install_router(monkeypatch, token_firmware(devices_xml))
     await _register_phone(hass)
+    entry = _entry()
+    entry.add_to_hass(hass)
+
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+
+    registry = er.async_get(hass)
+    for mac in (SAMSUNG_MAC, LAPTOP_MAC):
+        entity_id = registry.async_get_entity_id(
+            DEVICE_TRACKER_DOMAIN, DOMAIN, f"{entry.entry_id}_{mac}"
+        )
+        assert entity_id is not None
+        entity_entry = registry.async_get(entity_id)
+        assert entity_entry is not None
+        assert entity_entry.disabled_by is er.RegistryEntryDisabler.INTEGRATION
+        assert hass.states.get(entity_id) is None
+
+    device = dr.async_get(hass).async_get_device_by_identifier(
+        (DOMAIN, entry.entry_id), entry.entry_id
+    )
+    assert device is not None
+    assert device.configuration_url == f"http://{HOST}/"
+
+
+@pytest.mark.usefixtures("entity_registry_enabled_by_default")
+async def test_enabled_client_reports_router_state(
+    hass, devices_xml, monkeypatch
+) -> None:
+    """Once enabled, a tracker reports the client the router returned."""
+    install_router(monkeypatch, token_firmware(devices_xml))
     entry = _entry()
     entry.add_to_hass(hass)
 
@@ -76,22 +107,8 @@ async def test_known_mac_is_home_and_unknown_mac_is_disabled(
     assert state.attributes["host_name"] == "Samsung"
     assert state.attributes["source_type"] == "router"
 
-    registry = er.async_get(hass)
-    laptop = registry.async_get_entity_id(
-        DEVICE_TRACKER_DOMAIN, DOMAIN, f"{entry.entry_id}_{LAPTOP_MAC}"
-    )
-    assert laptop is not None
-    laptop_entry = registry.async_get(laptop)
-    assert laptop_entry.disabled_by is er.RegistryEntryDisabler.INTEGRATION
-    assert hass.states.get(laptop) is None
 
-    device = dr.async_get(hass).async_get_device_by_identifier(
-        (DOMAIN, entry.entry_id), entry.entry_id
-    )
-    assert device is not None
-    assert device.configuration_url == f"http://{HOST}/"
-
-
+@pytest.mark.usefixtures("entity_registry_enabled_by_default")
 async def test_consider_home_keeps_a_sleeping_client_home(
     hass, devices_xml, empty_devices_xml, monkeypatch, freezer
 ) -> None:
@@ -169,6 +186,7 @@ async def test_client_seen_after_startup_is_added(
     }
 
 
+@pytest.mark.usefixtures("entity_registry_enabled_by_default")
 async def test_unreachable_router_does_not_mark_clients_away(
     hass, devices_xml, monkeypatch
 ) -> None:
@@ -200,6 +218,7 @@ async def test_unreachable_router_does_not_mark_clients_away(
     assert state.state == "unavailable"
 
 
+@pytest.mark.usefixtures("entity_registry_enabled_by_default")
 async def test_unload(hass, devices_xml, monkeypatch) -> None:
     """Unloading removes the tracker state."""
     install_router(monkeypatch, token_firmware(devices_xml))
