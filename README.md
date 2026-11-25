@@ -10,7 +10,7 @@ The integration is [MIT licensed](LICENSE.md).
 
 Home Assistant **2026.10** or newer.
 
-The minimum stays 2026.10.0. Tests run on Home Assistant 2026.11.1. The device tracker code follows the 2026.10 config-entry and `ScannerEntity` APIs. Legacy `device_tracker` platforms are scheduled for removal in Home Assistant 2027.5, so setup is a config flow, with a one-time import of an existing YAML platform.
+The minimum stays 2026.10.0. Tests run on Home Assistant 2026.11.2. The device tracker code follows the 2026.10 config-entry and `ScannerEntity` APIs. Legacy `device_tracker` platforms are scheduled for removal in Home Assistant 2027.5, so setup is a config flow, with a one-time import of an existing YAML platform.
 
 ## Install
 
@@ -108,7 +108,7 @@ ruff format --check .
 pytest
 ```
 
-The tests run on Python 3.14.10 with `pytest-homeassistant` 2026.11.1, which installs Home Assistant 2026.11.1. Router HTTP is replaced with scripted responses, including all three firmware variants. Nothing in the test suite contacts a router.
+The tests run on Python 3.14.10 with `pytest-homeassistant` 2026.11.2, which installs Home Assistant 2026.11.2. Router HTTP is replaced with scripted responses, including all three firmware variants. Nothing in the test suite contacts a router.
 
 CI runs Ruff, pytest, [hassfest](https://github.com/home-assistant/actions), and [HACS validation](https://github.com/hacs/action).
 
