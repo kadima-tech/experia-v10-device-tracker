@@ -1,5 +1,5 @@
 # HTTP client used to log in to the router.
-# Home Assistant Core 2026.11.1 already installs requests==2.34.2, so
+# Home Assistant Core 2026.11.2 already installs requests==2.34.2, so
 # manifest.json does not repeat it. Custom integrations should not pin
 # packages that Core already provides.
 # https://developers.home-assistant.io/docs/creating_integration_manifest/

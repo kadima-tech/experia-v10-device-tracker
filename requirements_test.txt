@@ -1,5 +1,5 @@
-# pytest-homeassistant 2026.11.1 installs Home Assistant 2026.11.1.
-# That is the newest core release published on or before 2026-11-11.
-# Home Assistant 2026.11.2 was published on 2026-11-16.
-pytest-homeassistant==2026.11.1
-ruff==0.17.4
+# pytest-homeassistant 2026.11.2 installs Home Assistant 2026.11.2.
+# That is the newest core release published on or before 2026-11-18.
+# Home Assistant 2026.11.3 was published on 2026-11-23.
+pytest-homeassistant==2026.11.2
+ruff==0.17.5
